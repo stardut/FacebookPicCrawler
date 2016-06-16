@@ -1,0 +1,21 @@
+create table test(
+	id char(8) not null,
+	sex char(8),
+	name char(30),
+	address char(50),
+	birthday char(20),
+	birthplace char(50),
+	age char(15),
+	album smallint,
+	photo smallint,
+	primary key (id)
+	);
+
+insert into test(id, sex, name, address, birthday, age, album)value('1','男性','衛藤 バタラ','','07月27日','36歳',5);
+
+create table ID(
+	id char(8) not null,	
+	public smallint,
+	album smallint,
+	primary key (id)
+	);
