@@ -5,6 +5,8 @@
 # Copyright © 2016 mapleray <zhiwuliao#gmail.com>
 #
 # Distributed under terms of the MIT license.
+# 
+# TODO: get proxy
 
 import base64
 import requests

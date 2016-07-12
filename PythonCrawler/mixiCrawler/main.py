@@ -162,7 +162,6 @@ def handle_pic(_id, proxy):
 		print u'抓取出错'
 		print 'handle_pic is error:',e
 		return -2,public
-	
 
 #抓取每个相册中每一页图片的 url
 def handle_url(links, _id, proxy):
@@ -375,7 +374,10 @@ def login():
 		loginparams['post_key'] = postkey_value
 
 		#post 登录请求
-		response_login = s.post('https://mixi.jp/login.pl?from=login1', data = loginparams, headers = headers, timeout = 10)		
+		response_login = s.post('https://mixi.jp/login.pl?from=login1', 
+								data = loginparams,
+								headers = headers, 
+								timeout = 10)		
 		#soup = BeautifulSoup(response_login.text)
 		#check = soup.find('p', attrs = {'class' : 'photo'})
 		#获取验证 dditional_auth_data_id 的值
