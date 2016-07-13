@@ -4,5 +4,5 @@
 
 ##所抓取的网站分类
 
-* [mixi.jp](mixi.jp)
-* [facebook.com](facebook.com)
+* [mixi.jp](www.mixi.jp)
+* [facebook.com](www.facebook.com)
