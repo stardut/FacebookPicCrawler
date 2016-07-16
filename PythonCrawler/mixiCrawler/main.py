@@ -131,7 +131,7 @@ def start( _id):
 def handle_pic(_id, proxy):
 	public = 0
 	time.sleep(0)
-	global cookies	
+	global cookies
 	links = []
 	album_count = 0
 	photo_url = pic_url + str(_id)
