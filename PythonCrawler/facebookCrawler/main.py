@@ -13,15 +13,17 @@ import io
 import time
 import thread
 
-#USER_ID = 100010625445795
-USER_ID = 100010625445733
+USER_ACCOUNT = 'your login username'
+USER_PASSWORD = 'your login password'
+DOWNLOAD_PATH = 'picture save path in your computer'
+#DOWNLOAD_PATH = 'D:\workspace\crawlerData\\facebook\\'
+
+USER_ID = 100010625445795
+#USER_ID = 100010625440000
 URL_PHOTO_ALBUM_FRONT = 'https://www.facebook.com/profile.php?id='
 URL_PHOTO_ALBUM_END = '&sk=photos'
-DOWNLOAD_PATH = 'D:\workspace\crawlerData\\facebook\\'
 
 
-USER_ACCOUNT = '277907260@qq.com'
-USER_PASSWORD = 'a12jk12jk'
 URL_LOGIN = 'https://www.facebook.com/login.php?login_attempt=1&lwv=100'
 LOCAL_PATH = 'D:\workspace\Python\PythonCrawler\PythonCrawler\\facebookCrawler\\'
 COOKIES_FILE = LOCAL_PATH + 'cookies'
@@ -59,6 +61,7 @@ def start():
 	global USER_ID
 	USER_ID = USER_ID - 1
 	user_id = USER_ID
+	print 'Download and user id =',str(user_id)
 	url = URL_PHOTO_ALBUM_FRONT + str(user_id) + URL_PHOTO_ALBUM_END
 	try:
 		page = s.get(url = url, headers = headers, timeout = 10)
@@ -66,15 +69,15 @@ def start():
 		divs = soup.findAll('div', attrs = {
 			'class' : 'hidden_elem'
 			})
-		code_text = BeautifulSoup(divs[13].contents[0].contents[0])
-		if code_text is None:
-			print u'nonexistent user'
+		if len(divs) < 13:
+			print u'Nonexistent user'
 		else:
+			code_text = BeautifulSoup(divs[13].contents[0].contents[0])	
 			links = code_text.findAll('a', attrs = {
 				'class' : 'uiMediaThumb _6i9 uiMediaThumbMedium'
 				})
 			if links is None:
-				print u'no public picture'
+				print u'No public picture'
 			else:
 				for link in links:
 					pic_page(user_id, link['href'])
@@ -117,7 +120,7 @@ def download_pic(img_url, user_id):
 		image = open(filePath, 'wb')
 		image.write(data)
 		image.close()
-		print u'Download Succeed:' , filePath
+		print u'Success: ' , filePath
 	except Exception,e:
 		print "download_pic error: ",e
 
@@ -185,7 +188,7 @@ def main():
    			thread.start_new_thread(crawl,('thread-4',0.4))   		
    		except Exception,e:
    			print 'thread error:',e
-   		crawle('main',0.5)
+   		crawl('main',0.5)
 	else:
 		print 'login fail.please check your user and password!'
 		print 'Maybe solve: --> delete the ' + COOKIES_FILE + ' and then try again.'
