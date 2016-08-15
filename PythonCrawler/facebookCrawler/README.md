@@ -13,7 +13,7 @@ If you want to run the cralwer.Follew the setting and you can run the program
  * Set your facebook username and password:
  
 	 ```python
-		USER = [
+    USER = [
       {
         'email' : 'xxxxxxxxxx',
         'pass' : 'xxxxxxx'
