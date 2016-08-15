@@ -18,29 +18,24 @@ USER_ID = 100010625445795
 URL_PHOTO_ALBUM_FRONT = 'https://www.facebook.com/profile.php?id='
 URL_PHOTO_ALBUM_END = '&sk=photos'
 DOWNLOAD_PATH = 'E:\\ranjun\\data\\facebookData\\'
-
 URL_LOGIN = 'https://www.facebook.com/login.php?login_attempt=1&lwv=100'
-LOCAL_PATH = 'E:\\ranjun\\data\\'
-COOKIES_FILE = LOCAL_PATH + 'cookies'
+COOKIES_FILE = DOWNLOAD_PATH + 'cookies'
 TIME = time.time()
-
-#账号不同，所抓取的页面元素也不同
-#10 1
-#13 3
-
+stop = False
 SELECT_NUM = 0
+
 USER = [
   {
-    'email' : 'xxxxxxx',
-    'pass' : 'xxxxxx'
-  },
-  {
-    'email' : 'xxxxxxxx',
+    'email' : 'xxxxxxxxxx',
     'pass' : 'xxxxxxx'
   },
   {
     'email' : 'xxxxxxxxxx',
-    'pass' : 'xxxxxx'
+    'pass' : 'xxxxxxx'
+  },
+  {
+    'email' : 'xxxxxxxxx',
+    'pass' : 'xxxxxxxx'
   },
 ]
 
@@ -67,7 +62,7 @@ s.cookies = LWPCookieJar(COOKIES_FILE)
 #     page: content
 #     name: file name
 def save_page(page, name):
-  file = open(LOCAL_PATH + name + '.html','w')
+  file = open(DOWNLOAD_PATH + name + '.html','w')
   file.write(page)
   file.close()
 
@@ -77,29 +72,34 @@ def start(name):
   global s
   global USER_ID
   global TIME
+  global stop
   check_num = 1
-  if time.time() - TIME > 3600 / 2:
+  while stop:
+    time.sleep(5)
+  if time.time() - TIME > 3600 / 4:
+    stop = True
     TIME = time.time()
     while(login(check_num) == False):
       check_num += 1
       if check_num > 5:
         check_num = 1
-
+    stop = False
   USER_ID = USER_ID - 1
   user_id = USER_ID
   print 'Download and user id =',str(user_id)
   url = URL_PHOTO_ALBUM_FRONT + str(user_id) + URL_PHOTO_ALBUM_END
   try:
+    if stop:
+      return
     page = s.get(url = url, headers = headers, timeout = 10)
     soup = BeautifulSoup(page.content)
     divs = soup.findAll('div', attrs = {
       'class' : 'hidden_elem'
     })
     code_text = BeautifulSoup(divs[13].contents[0].contents[0])
-    if len(divs) < 13:
+    if code_text is None:
       print u'Nonexistent user'
     else:
-      code_text = BeautifulSoup(divs[13].contents[0].contents[0])	
       links = code_text.findAll('a', attrs = {
         'class' : 'uiMediaThumb _6i9 uiMediaThumbMedium'
       })
@@ -121,7 +121,10 @@ def start(name):
 def pic_page(user_id, link):
   time.sleep(0.7)
   global s
+  global stop
   try:
+    if stop:
+      return
     page = s.get(url = link, headers = headers, timeout = 10)
     soup = BeautifulSoup(page.text)
     divs = soup.findAll('div',attrs = {
@@ -143,22 +146,25 @@ def pic_page(user_id, link):
 def download_pic(img_url, user_id):
   global IMAGE_NUM
   global s
+  global stop
   download_path = DOWNLOAD_PATH + str(user_id)
   if not os.path.exists(download_path):
     os.mkdir(download_path)
-    try:
-      data = s.get(img_url, timeout = 10, headers = headers).content
-      IMAGE_NUM += 1
-      num = IMAGE_NUM
-      fileName = str(int(time.time()))  + '_' + str(num) + '.jpg'
-      filePath = download_path + '\\' + fileName
-      image = open(filePath, 'wb')
-      image.write(data)
-      image.close()
-      print u'Success: ' , filePath + '\n'
-    except Exception,e:
-      pass
-      # print "download_pic error: ",e
+  try:
+    if stop:
+      return
+    data = s.get(img_url, timeout = 10, headers = headers).content
+    IMAGE_NUM += 1
+    num = IMAGE_NUM
+    fileName = str(int(time.time()))  + '_' + str(num) + '.jpg'
+    filePath = download_path + '\\' + fileName
+    image = open(filePath, 'wb')
+    image.write(data)
+    image.close()
+    print u'Success: ' , filePath + '\n'
+  except Exception,e:
+    pass
+    # print "download_pic error: ",e
 
 
 #function check_cookies
@@ -196,7 +202,6 @@ def login(check):
                         cookies = cookies,
                         headers = headers,
                         timeout = 10)
-
     is_success = check_login_success(login_res.text)
     if is_success:
       s = temp_s
@@ -245,7 +250,7 @@ def main():
       thread.start_new_thread(crawl,('thread-2', 0.8 + delay_time))
     except Exception,e:
       print 'thread error:',e
-      crawl('main',0.5)
+    crawl('main',1.5)
   else:
     print 'Login fail. Please check your user and password!'
     print 'Test your account in network and try again'
