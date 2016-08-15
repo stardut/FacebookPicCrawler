@@ -10,22 +10,50 @@ If you want to run the cralwer.Follew the setting and you can run the program
 
  * Install [Python2.7](https://www.python.org/)
  * Install lib [requests](http://docs.python-requests.org/en/master/) and [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
- * Set your facebook username and password
+ * Set your facebook username and password:
  
 	 ```python
-		USER_ACCOUNT = 'your login username'
-		USER_PASSWORD = 'your login password'
+		USER = [
+      {
+        'email' : 'xxxxxxxxxx',
+        'pass' : 'xxxxxxx'
+      },
+    ]
+
 	 ```
-  or use mulitple
- * Set save path in your computer
+  or use mulitple account:
+
+  ```python
+    USER = [
+      {
+        'email' : 'xxxxxxxxxx',
+        'pass' : 'xxxxxxx'
+      },
+      {
+        'email' : 'xxxxxxxxxx',
+        'pass' : 'xxxxxxx'
+      },
+      {
+        'email' : 'xxxxxxxxx',
+        'pass' : 'xxxxxxxx'
+      },
+    ]
+
+  ```
+
+ * Set save path in your computer:
  
 	```python
 		DOWNLOAD_PATH = 'picture save path in your computer'
 	```
 
+##Run
+
+  `python main.py`
+
 ##Crawl Strategy
 
-  * From user id equel 100010625445795 start and every times minus 1
+  * From user id equel `100010625445795` start and every times minus 1
   * Useing thread improve work efficiency
  
 ##Trouble
