@@ -13,12 +13,25 @@ import time
 import thread
 import re
 
+<<<<<<< HEAD
 
 IMAGE_NUM = 0
 USER_ID = 100010625445795
 URL_PHOTO_ALBUM_FRONT = 'https://www.facebook.com/profile.php?id='
 URL_PHOTO_ALBUM_END = '&sk=photos'
 DOWNLOAD_PATH = 'E:\\ranjun\\data\\facebookData\\'
+=======
+USER_ACCOUNT = 'your login username'
+USER_PASSWORD = 'your login password'
+DOWNLOAD_PATH = 'picture save path in your computer'
+#DOWNLOAD_PATH = 'D:\workspace\crawlerData\\facebook\\'
+
+USER_ID = 100010625445795
+#USER_ID = 100010625440000
+URL_PHOTO_ALBUM_FRONT = 'https://www.facebook.com/profile.php?id='
+URL_PHOTO_ALBUM_END = '&sk=photos'
+
+>>>>>>> a948b92ba64ba6ab377c3b59adc018f535a1f78d
 
 URL_LOGIN = 'https://www.facebook.com/login.php?login_attempt=1&lwv=100'
 LOCAL_PATH = 'E:\\ranjun\\data\\'
@@ -89,22 +102,30 @@ def start(name):
 
 	USER_ID = USER_ID - 1
 	user_id = USER_ID
+	print 'Download and user id =',str(user_id)
 	url = URL_PHOTO_ALBUM_FRONT + str(user_id) + URL_PHOTO_ALBUM_END
 	try:
 		page = s.get(url = url, headers = headers, timeout = 10)
 		soup = BeautifulSoup(page.content)
 		divs = soup.findAll('div', attrs = {
 			'class' : 'hidden_elem'
+<<<<<<< HEAD
 			})		
 		code_text = BeautifulSoup(divs[13].contents[0].contents[0])
 		if code_text is None:
 			print u'nonexistent user'
+=======
+			})
+		if len(divs) < 13:
+			print u'Nonexistent user'
+>>>>>>> a948b92ba64ba6ab377c3b59adc018f535a1f78d
 		else:
+			code_text = BeautifulSoup(divs[13].contents[0].contents[0])	
 			links = code_text.findAll('a', attrs = {
 				'class' : 'uiMediaThumb _6i9 uiMediaThumbMedium'
 				})
 			if links is None:
-				print u'no public picture'
+				print u'No public picture'
 			else:
 				for link in links:
 					pic_page(user_id, link['href'])
@@ -155,7 +176,11 @@ def download_pic(img_url, user_id):
 		image = open(filePath, 'wb')
 		image.write(data)
 		image.close()
+<<<<<<< HEAD
 		print u'图片下载成功:' , filePath + '\n'
+=======
+		print u'Success: ' , filePath
+>>>>>>> a948b92ba64ba6ab377c3b59adc018f535a1f78d
 	except Exception,e:
 		pass
 		# print "download_pic error: ",e
@@ -240,6 +265,7 @@ def main():
 	if check_cookies():
 		print 'start working...'
 		try:
+<<<<<<< HEAD
 			#you can add any threads
 			delay_time = 1
 			thread.start_new_thread(crawl,('thread-1', 0.3 + delay_time))
@@ -247,6 +273,15 @@ def main():
 		except Exception,e:
 			print 'thread error:',e
 		crawl('main', 1.5)
+=======
+			thread.start_new_thread(crawl,('thread-1',0.1))
+   			thread.start_new_thread(crawl,('thread-2',0.2))
+   			thread.start_new_thread(crawl,('thread-3',0.3))
+   			thread.start_new_thread(crawl,('thread-4',0.4))   		
+   		except Exception,e:
+   			print 'thread error:',e
+   		crawl('main',0.5)
+>>>>>>> a948b92ba64ba6ab377c3b59adc018f535a1f78d
 	else:
 		print 'Login fail. Please check your user and password!'
 		print 'Test your account in network and try again'
