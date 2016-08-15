@@ -5,26 +5,46 @@ from multiprocessing.dummy import Pool as ThreadPool
 from bs4 import BeautifulSoup
 from cookielib import LWPCookieJar
 import requests
-import GetArg
 import random
 import os
 import sys
 import io
 import time
 import thread
+import re
 
-#USER_ID = 100010625445795
-USER_ID = 100010625445733
+
+IMAGE_NUM = 0
+USER_ID = 100010625445795
 URL_PHOTO_ALBUM_FRONT = 'https://www.facebook.com/profile.php?id='
 URL_PHOTO_ALBUM_END = '&sk=photos'
-DOWNLOAD_PATH = 'D:\workspace\crawlerData\\facebook\\'
+DOWNLOAD_PATH = 'E:\\ranjun\\data\\facebookData\\'
 
-
-USER_ACCOUNT = '277907260@qq.com'
-USER_PASSWORD = 'a12jk12jk'
 URL_LOGIN = 'https://www.facebook.com/login.php?login_attempt=1&lwv=100'
-LOCAL_PATH = 'D:\workspace\Python\PythonCrawler\PythonCrawler\\facebookCrawler\\'
+LOCAL_PATH = 'E:\\ranjun\\data\\'
 COOKIES_FILE = LOCAL_PATH + 'cookies'
+TIME = time.time()
+
+#账号不同，所抓取的页面元素也不同
+#10 1
+#13 3
+
+SELECT_NUM = 0
+USER = [
+	{
+		'email' : 'xxxxxxx',
+		'pass' : 'xxxxxx'
+	},
+	{
+		'email' : 'xxxxxxxx',
+		'pass' : 'xxxxxxx'
+	},
+	{
+		'email' : 'xxxxxxxxxx',
+		'pass' : 'xxxxxx'
+	},
+
+]
 
 headers = {
     'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2763.0 Safari/537.36',
@@ -44,19 +64,29 @@ s.headers.update(headers)
 s.cookies = LWPCookieJar(COOKIES_FILE)
 
 #function save_page
-#	TODO->save html for debug
-#	@param
-#	page: content
-#	name: file name
+#	DO: save html for debug
+#	@param:
+#		page: content
+#		name: file name
 def save_page(page, name):
-	file = open(LOCAL_PATH + name + 'test.html','w')
+	file = open(LOCAL_PATH + name + '.html','w')
 	file.write(page)
 	file.close()
 
+
 #function start
-def start():	
+def start(name):
 	global s
 	global USER_ID
+	global TIME
+	check_num = 1
+	if time.time() - TIME > 3600 / 2:
+		TIME = time.time()
+		while(login(check_num) == False):
+			check_num += 1
+			if check_num > 5:
+				check_num = 1
+
 	USER_ID = USER_ID - 1
 	user_id = USER_ID
 	url = URL_PHOTO_ALBUM_FRONT + str(user_id) + URL_PHOTO_ALBUM_END
@@ -65,7 +95,7 @@ def start():
 		soup = BeautifulSoup(page.content)
 		divs = soup.findAll('div', attrs = {
 			'class' : 'hidden_elem'
-			})
+			})		
 		code_text = BeautifulSoup(divs[13].contents[0].contents[0])
 		if code_text is None:
 			print u'nonexistent user'
@@ -79,15 +109,17 @@ def start():
 				for link in links:
 					pic_page(user_id, link['href'])
 	except Exception,e:
-		print 'start error:',e
+		pass
+		# print 'start error:',e
+
 
 #function pic_page
-#	TODO->get picture's link
+#	DO:get picture's link
 #	@param:
-#	user_id: download user id
-#	link   : get picture's links page link	
+#		user_id: download user id
+#		link   : get picture's links page link	
 def pic_page(user_id, link):
-	time.sleep(0.2)
+	time.sleep(0.7)
 	global s
 	try:
 		page = s.get(url = link, headers = headers, timeout = 10)
@@ -99,96 +131,126 @@ def pic_page(user_id, link):
 		pic_link = a.find('img', attrs = {'class' : '_46-i img'})['src']
 		download_pic(pic_link, user_id)
 	except Exception,e:
-		print 'pic_page error:',e
+		pass
+		# print 'pic_page error:',e
 
-#function download_pic
-#	TODO->download picture
-#	@param:
-#	img_url : image's download url
-#	user_id : download user id
+
+# function download_pic
+# 	DO:download picture
+# 	@param:
+# 		img_url : image's download url
+# 		user_id : download user id
 def download_pic(img_url, user_id):
+	global IMAGE_NUM
+	global s
 	download_path = DOWNLOAD_PATH + str(user_id)
 	if not os.path.exists(download_path):
 		os.mkdir(download_path)
 	try:
-		data = requests.get(img_url,timeout = 10, headers = headers).content
-		fileName = str(int(time.time())) + '.jpg'
+		data = s.get(img_url, timeout = 10, headers = headers).content
+		IMAGE_NUM += 1
+		num = IMAGE_NUM
+		fileName = str(int(time.time()))  + '_' + str(num) + '.jpg'
 		filePath = download_path + '\\' + fileName
 		image = open(filePath, 'wb')
 		image.write(data)
 		image.close()
-		print u'Download Succeed:' , filePath
+		print u'图片下载成功:' , filePath + '\n'
 	except Exception,e:
-		print "download_pic error: ",e
+		pass
+		# print "download_pic error: ",e
+
 
 #function check_cookies
-#	TODO->check cookies weather exist
+#	DO:check cookies weather exist
 def check_cookies():
-	print 'begining...'
+	print 'Beginning...'
 	if not os.path.exists(COOKIES_FILE):
-		if login():
+		if login(1):
 			return True
-		else:
-			return False
+		return False
 	else:
 		s.cookies.load()
-		print 'load cookies success'
+		print 'Load cookies success'
 		return True
 
+
 #function login
-#	TODO->login and save cookies into file
-def login():
-	login_params = {
-		'email':USER_ACCOUNT,
-		'pass':USER_PASSWORD
-	}	
-	login_page = s.get(URL_LOGIN)
+#	DO:login and save cookies into file
+def login(check):
+	global SELECT_NUM
+	global USER
+	global s
+	temp_s = requests.Session()
+	if check > 5:
+		SELECT_NUM += 1
+		SELECT_NUM %= len(USER)
+	login_params = USER[SELECT_NUM]
+	print 'trying login %d time(s)' % check		
+	print 'account =', login_params['email']	
+	login_page = temp_s.get(URL_LOGIN)
 	cookies = login_page.cookies
 	try:
-		login_res = s.post(url = URL_LOGIN,
+		login_res = temp_s.post(url = URL_LOGIN,
 						data = login_params,
 						cookies = cookies,
 						headers = headers,
 						timeout = 10)
+
+		is_success = check_login_success(login_res.text)
+		# save_page(login_res.content, 'login')
+		if is_success:
+			s = temp_s
+			SELECT_NUM += 1
+			SELECT_NUM %= len(USER)
+			print 'login success!'
+		else:			
+			print 'login fail!'
+		return is_success
 	except Exception,e:
 		print 'login error:',e
-	is_success = False
-	print login_res
-	if 1:   #TODO -> check login state (need complete)
-		is_success = True
-	else:
-		is_success = False
-		print 'get cookies fail'
-	return is_success
+		return False
+
+
+def check_login_success(html):
+	pattern = re.compile(r'_mp3\s_mp3')
+	m = pattern.search(html)
+	if m == None:
+		return False
+	return True
+
 
 #function crawl
-#	TODO->start crawl data
-#	@param
-#	name : thread name
-#	delay: delay time
+#	DO:start crawl data
+#	@param:
+#		name : thread name
+#		delay: delay time
 def crawl(name,delay):
 	global USER_ID
-	while USER_ID > 0:		
+	while USER_ID > 0:	
 		time.sleep(delay)
-		start()
+		start(name)
+
 
 #function main
-# TODO->create thread
+#   DO:create thread
 def main():
+	global TIME
+	TIMR = time.time()
 	if check_cookies():
-		print 'login success!'
 		print 'start working...'
 		try:
-			thread.start_new_thread(crawl,('thread-1',0.1))
-   			thread.start_new_thread(crawl,('thread-2',0.2))
-   			thread.start_new_thread(crawl,('thread-3',0.3))
-   			thread.start_new_thread(crawl,('thread-4',0.4))   		
-   		except Exception,e:
-   			print 'thread error:',e
-   		crawle('main',0.5)
+			#you can add any threads
+			delay_time = 1
+			thread.start_new_thread(crawl,('thread-1', 0.3 + delay_time))
+			thread.start_new_thread(crawl,('thread-2', 0.8 + delay_time))
+		except Exception,e:
+			print 'thread error:',e
+		crawl('main', 1.5)
 	else:
-		print 'login fail.please check your user and password!'
-		print 'Maybe solve: --> delete the ' + COOKIES_FILE + ' and then try again.'
+		print 'Login fail. Please check your user and password!'
+		print 'Test your account in network and try again'
+
 
 if __name__ == '__main__':
 	main()
