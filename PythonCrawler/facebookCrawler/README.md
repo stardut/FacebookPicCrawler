@@ -1,10 +1,10 @@
-#Python Crawler Facebook
+# Python Crawler Facebook
 
-##Function
+## Function
 
 Crawl the [Facebook](https://www.facebook.com) user's public picture
 
-##Setting
+## Setting
 
 If you want to run the cralwer.Follew the setting and you can run the program
 
@@ -47,22 +47,28 @@ If you want to run the cralwer.Follew the setting and you can run the program
 		DOWNLOAD_PATH = 'picture save path in your computer'
 	```
 
-##Run
+## Run
 
   `python main.py`
 
-##Crawl Strategy
+## Crawl Strategy
 
   * From user id equel `100010625445795` start and every times minus 1
   * Useing thread improve work efficiency
  
-##Trouble
+## Trouble
   * It's hard to analysis Facebook's html page structure.
   * Many data use Ajax.
 
-##Exist problem(Bug?)
+## Exist problem(Bug?)
   * Some user crawl fail and I don't kown why.(玄学)
 
 ##Star
 If you like the crawler or it can help you,give me a star.<br>
 Thank you.
+
+## Effect
+
+![facebook1](https://github.com/Stardust-/PythonCrawler/raw/master/MarkdownPic/facebook1.png)
+![facebook2](https://github.com/Stardust-/PythonCrawler/raw/master/MarkdownPic/facebook2.jpg)
+![facebook3](https://github.com/Stardust-/PythonCrawler/raw/master/MarkdownPic/facebook3.png)

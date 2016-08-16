@@ -12,11 +12,12 @@ import re
 import cookielib
 import requests
 import string
-import MySQLdb
+#import MySQLdb
 import urllib2
 import Queue
 import random
 import GetArg
+import thread
 
 
 #mixi网站的编码为 euc-jp
@@ -24,7 +25,7 @@ reload(sys)
 sys.setdefaultencoding('euc-jp')
 
 #已经下载好的用户数
-_id = 748
+user_id = 14431
 
 user_home_url = 'http://mixi.jp/show_friend.pl?id='
 pic_url = 'http://mixi.jp/list_album.pl?id='
@@ -59,8 +60,8 @@ db_password = 'a12jk12jk'
 db_name = 'image_info'
 
 #建立数据库连接
-db = MySQLdb.connect(localhost, db_user, db_password, db_name)
-cursor = db.cursor()
+# db = MySQLdb.connect(localhost, db_user, db_password, db_name)
+# cursor = db.cursor()
 
 #连接太少会报 max tries 异常
 '''
@@ -108,9 +109,12 @@ def download_pic(_id, img_url, load_path, proxy):
 		print "download_pic error: ",e
 
 #开始执行抓取任务：图片和个人信息
-def start( _id):
-	time.sleep(0)
+def start(name, delay_time):
+	time.sleep(delay_time)
 	global cookies
+	global user_id
+	user_id += 1
+	_id = user_id
 	proxy = {}
 	#模拟浏览器
 	agent_num = int(random.random() * 170) % 17
@@ -118,19 +122,20 @@ def start( _id):
 	headers['User-Agent'] = arg.getAgent(agent_num)
 	#设置动态ip
 	proxy['http'] = proxies[ip_num]
-	proxy['https'] = proxies[ip_num]	
-	if check_id_album(_id) > 0:
-		print u"\n正在下载用户ID为 %s 的数据..." % str(_id)
-		album_count, public = handle_pic(_id, proxy)
-		'''
-		if album_count > -1:
-			handle_info( _id, album_count, public, proxy)
-		'''
+	proxy['https'] = proxies[ip_num]
+	album_count, public = handle_pic(_id, proxy)
+	# if check_id_album(_id) > 0:
+	# 	print u"\n正在下载用户ID为 %s 的数据..." % str(_id)
+	# 	album_count, public = handle_pic(_id, proxy)
+	# 	'''
+	# 	if album_count > -1:
+	# 		handle_info( _id, album_count, public, proxy)
+	# 	'''
 
 #抓取user相册
 def handle_pic(_id, proxy):
 	public = 0
-	time.sleep(0)
+	time.sleep(3)
 	global cookies
 	links = []
 	album_count = 0
@@ -139,11 +144,11 @@ def handle_pic(_id, proxy):
 		html = requests.get(photo_url, cookies = cookies, headers = headers, timeout = 10)
 		#html = requests.get(photo_url, cookies = cookies, headers = headers, timeout = 10, proxies = proxy)
 
-		file = open('D:\pythonSpider\mycode\data.html','w')
+		file = open('E:\\ranjun\data\mixiData\html.html','w')
 		file.write(html.content)
 		file.close()
 		soup = BeautifulSoup(html.text)
-		div = soup.find('div', attrs = {'class' : 'leftbox'})
+		div = soup.find('div', attrs = {'class' : 'pageTitle friendPhotoTitle001'})
 		if  div is None:
 			print u"\n用户不存在 id：%s" % str(_id)
 			return -1,0
@@ -166,7 +171,7 @@ def handle_pic(_id, proxy):
 #抓取每个相册中每一页图片的 url
 def handle_url(links, _id, proxy):
 	public = 0
-	time.sleep(0)
+	time.sleep(5)
 	global cookies
 	#判断是否可以为公开相册
 	try:
@@ -186,7 +191,6 @@ def handle_url(links, _id, proxy):
 				#之后每一页分别抓取
 				#html = requests.get(link, cookies = cookies, headers = headers,  timeout = 10, proxies = proxy)
 				html = requests.get(link, cookies = cookies, headers = headers,  timeout = 10)
-
 				soup = BeautifulSoup(html.text)
 				page_list = soup.find('div', attrs = {'class' : 'pagetext_top inlineList'})
 				if page_list is not None:
@@ -201,7 +205,7 @@ def handle_url(links, _id, proxy):
 
 #抓取每一页图片的放大的url
 def handle_pic_url(url, _id, proxy):
-	time.sleep(0)
+	time.sleep(5)
 	global cookies
 	try:
 		html = requests.get(url, cookies = cookies, headers = headers,  timeout = 10)
@@ -220,14 +224,14 @@ def handle_pic_url(url, _id, proxy):
 #获取每个图片的下载url
 def handle_pic_download_url(url, _id, proxy):
 	global cookies
-	time.sleep(18)
+	time.sleep(10)
 	try:
 		#html = requests.get(url, cookies = cookies, headers = headers, timeout = 10, proxies = proxy)
 		html = requests.get(url, cookies = cookies, headers = headers, timeout = 10)
 		soup = BeautifulSoup(html.text)
 		img = soup.find('img', attrs = {'alt' : 'photo'})
 		link = img['src']
-		load_path = 'D:\pythonSpider\data\photo\\' + str(_id)
+		load_path = 'E:\\ranjun\data\mixiData\\' + str(_id)
 		pic_name = int(time.time())
 		if not os.path.exists(load_path):
 			os.makedirs(load_path)
@@ -405,28 +409,13 @@ def login():
 		return None
 
 if __name__ == '__main__':
-	#已经下载好的用户数
-	_id = 9368
 	global cookies
 	cookies = login()
 	#使用多线程
-	pool = ThreadPool(2)
-	#之前已经下载好的用户数 _id
-	while cookies is not None and _id < 15010:
-		
-		time.sleep(0)
-		_id = int(_id) + 1
-		start(_id)
-		'''
-		#此处为多线程抓取
-		begin = int (_id)
-		end = begin + 100
-		_id = end
-		pool.map(start, range(begin, end))
-		'''
-	
-	db.close()
-	pool.close()
-	pool.join()
-
+	while user_id > 0:
+		try:
+			delay_time = 1
+   		except Exception,e:
+   			print 'thread error: ',e
+   		start('main', 0.3)
 	#raw_input("Press <Enter> To Quit!")	
